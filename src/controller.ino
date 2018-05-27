@@ -131,9 +131,12 @@ void on_mqtt_msg(char* topic, byte* payload, unsigned int len)
     send_state_msg();
 
   if (strcmp(parsed[0], "desired_state") == 0)
-    set_relay (strcmp(parsed[2], "1") == 0 ? true : false);
+    set_relay(strcmp(parsed[2], "1") == 0 ? true : false);
 
   cleanup:
+    for (int i = 0; parsed[i]; i++)
+        free( parsed[i] );
+    free(parsed);
     free(msg);
 }
 
@@ -168,7 +171,7 @@ char** parse_msg_payload(char* payload)
 {
   const char* delim = "|";
   
-  size_t len = strlen(payload) + character_count(payload, delim[0]) + 1;
+  size_t len = character_count(payload, delim[0]) + 3;
 
   char** result = (char**) malloc(sizeof(char*) * len);
 
