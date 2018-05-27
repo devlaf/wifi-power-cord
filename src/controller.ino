@@ -25,7 +25,7 @@ bool relay_state;
 void setup()
 {
   Serial.begin(9600);
- 
+
   pinMode(pin_relay_signal, OUTPUT);
   pinMode(pin_net_id_bit_3, INPUT);
   pinMode(pin_net_id_bit_2, INPUT);
@@ -56,13 +56,13 @@ void set_hostname()
 {
   int id = read_dip_id();
 
-  size_t len = snprintf(NULL, 0, "esp8266-%d", id);                                                
-  hostname = (char*)malloc(len+1);                                                                                      
+  size_t len = snprintf(NULL, 0, "esp8266-%d", id);
+  hostname = (char*)malloc(len+1);
   sprintf(hostname, "esp8266-%d", id);
 
   Serial.print("Setting host name to ");
   Serial.println(hostname);
-  
+
   WiFi.hostname(hostname);
 }
 
@@ -102,7 +102,7 @@ bool ensure_mqtt_connection()
   mqtt_client.setClient(wifi_client);
   mqtt_client.setServer(mqtt_server,mqtt_server_port);
   mqtt_client.setCallback(on_mqtt_msg);
-  
+
   if (mqtt_client.connect(hostname, mqtt_user, mqtt_password)) {
     Serial.println("connected.");
     mqtt_client.subscribe(mqtt_outlet_topic);
@@ -118,7 +118,7 @@ void on_mqtt_msg(char* topic, byte* payload, unsigned int len)
 {
   if (strcmp(topic, mqtt_outlet_topic) != 0)
     return;
-  
+
   char* msg = (char*)malloc(len);
   memcpy(msg, payload, len);
 
@@ -126,7 +126,7 @@ void on_mqtt_msg(char* topic, byte* payload, unsigned int len)
 
   if (strcmp(parsed[1], hostname) != 0)
     goto cleanup;
-  
+
   if (strcmp(parsed[0], "state_request") == 0)
     send_state_msg();
 
@@ -135,7 +135,7 @@ void on_mqtt_msg(char* topic, byte* payload, unsigned int len)
 
   cleanup:
     for (int i = 0; parsed[i]; i++)
-        free( parsed[i] );
+        free(parsed[i]);
     free(parsed);
     free(msg);
 }
@@ -150,12 +150,12 @@ void send_state_msg()
 void set_relay(bool engage)
 {
   Serial.println("Toggling relay");
-    
+
   relay_state = engage;
-  
+
   if (engage)
     digitalWrite(pin_relay_signal, HIGH);
-  else 
+  else
     digitalWrite(pin_relay_signal, LOW);
 }
 
@@ -170,7 +170,7 @@ char* serialize_current_state()
 char** parse_msg_payload(char* payload)
 {
   const char* delim = "|";
-  
+
   size_t len = character_count(payload, delim[0]) + 3;
 
   char** result = (char**) malloc(sizeof(char*) * len);
@@ -192,14 +192,13 @@ char** parse_msg_payload(char* payload)
 int character_count(char* msg, const char character)
 {
   int count = 0;
-  
+
   char* tmp = msg;
   while (*tmp) {
     if (character == *tmp)
       count++;
     tmp++;
   }
-    
+
   return count;
 }
-
